@@ -1,5 +1,6 @@
 import datasets
 import models
+import numpy as np
 import torch
 import tqdm
 
@@ -12,6 +13,20 @@ def make_loss_fn(importance_weights):
         return torch.mean(per_sample_errs)
     
     return loss_fn
+
+
+# Use this inside a LambdaLR
+def build_scheduler(warmup_steps, lr_max, total_steps):
+  def scheduler(t):
+    if t <= warmup_steps:  # linear warmup
+      return t * lr_max / warmup_steps
+
+    else:  # cosine decay -> 0
+      t_cos = t - warmup_steps
+      cos_steps = total_steps - warmup_steps
+      return 0.5 * lr_max * (1 +  np.cos(np.pi * t_cos / cos_steps))
+
+  return scheduler
 
 
 def train(config, progressbar=False):
@@ -34,9 +49,16 @@ def train(config, progressbar=False):
     model = models.ReluOut(n, m).to(device)
     
     # Training setup
-    importance_weights = dataset.make_importance_weights(data_cfg['importance_weight'])
+    importance_weights = dataset.make_importance_weights(
+       data_cfg['importance_weight'])
     loss_fn = make_loss_fn(importance_weights)
-    optimizer=torch.optim.AdamW(model.parameters(), lr=train_cfg['lr'])
+    optimizer=torch.optim.AdamW(model.parameters(), lr=1)  # lr from scheduler
+    lr_fn = build_scheduler(
+       train_cfg['warmup_steps'],
+       train_cfg['lr'],
+       train_cfg['n_steps']
+       )
+    scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lr_fn)
     
     # Train loop
     losses = []
@@ -54,6 +76,7 @@ def train(config, progressbar=False):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        scheduler.step()
 
         losses.append(loss.item())
         
