@@ -23,6 +23,10 @@ class SparseDataset:
         """Sample from the distribution by first sampling from the raw distribution and then sparsifying."""
         sample = self._raw_dist.sample(sample_shape=[n_samples,])
         return sample * self._sparsity_dist.sample(sample_shape=[n_samples,])
+        
+    def make_importance_weights(self, decay_val):
+        """Create set of feature importance weights: w_i = decay_val^i"""
+        return torch.pow(decay_val, torch.arange(self.d))
     
     
 def make_bernoulli_dist(p, d, device="cpu"):
