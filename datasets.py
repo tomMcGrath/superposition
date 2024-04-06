@@ -12,6 +12,8 @@ class SparseDataset:
         self._raw_dist = raw_dist
         self._sparsity_dist = sparsity_dist
         self._check_dims_match()
+        self.d = self._raw_dist.low.shape[0]  # dimensionality of data
+        self.device = self._raw_dist.low.device
 
     def _check_dims_match(self):
         """Check the two distributions have the same shape samples."""
@@ -26,7 +28,7 @@ class SparseDataset:
         
     def make_importance_weights(self, decay_val):
         """Create set of feature importance weights: w_i = decay_val^i"""
-        return torch.pow(decay_val, torch.arange(self.d))
+        return torch.pow(decay_val, torch.arange(self.d)).to(self.device)
     
     
 def make_bernoulli_dist(p, d, device="cpu"):
