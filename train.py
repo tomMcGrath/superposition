@@ -68,8 +68,14 @@ def train(config, progressbar=False):
     else:
         step_iter = range(train_cfg['n_steps'])
 
-    for _ in step_iter:
-        x = dataset.sample(train_cfg['batch_size'])
+    for step in step_iter:
+        # Might want to stick to full-batch GD, e.g. for
+        # https://transformer-circuits.pub/2023/toy-double-descent/index.html
+        if step == 0:
+           x = dataset.sample(train_cfg['batch_size'])
+
+        if step > 0 and train_cfg['resample']:
+            x = dataset.sample(train_cfg['batch_size'])
         x_hat = model(x)
         loss = loss_fn(x, x_hat)
 
