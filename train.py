@@ -32,7 +32,6 @@ def train(config, progressbar=False):
     # Model setup
     m = model_cfg['hidden_dim']
     model = models.ReluOut(n, m).to(device)
-    print(model.W.shape)
     
     # Training setup
     importance_weights = dataset.make_importance_weights(data_cfg['importance_weight'])
