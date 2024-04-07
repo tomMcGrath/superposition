@@ -23,6 +23,7 @@ class SparseDataset:
     
     def sample(self, n_samples):
         """Sample from the distribution by first sampling from the raw distribution and then sparsifying."""
+        # TODO(tom): add option to normalize
         sample = self._raw_dist.sample(sample_shape=[n_samples,])
         return sample * self._sparsity_dist.sample(sample_shape=[n_samples,])
         

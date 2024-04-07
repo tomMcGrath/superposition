@@ -49,6 +49,7 @@ def train(config, progressbar=False):
     model = models.ReluOut(n, m).to(device)
     
     # Training setup
+    # TODO(tom): add weight decay
     importance_weights = dataset.make_importance_weights(
        data_cfg['importance_weight'])
     loss_fn = make_loss_fn(importance_weights)
