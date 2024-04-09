@@ -53,7 +53,11 @@ class SparseAutoEncoder(torch.nn.Module):
       hidden_dim, input_dim
     )
 
-  def forward(self, x):
+  def forward(self, x, with_activations=False):
     f_preactivations = self.encoder(x)
     f = torch.nn.functional.relu(f_preactivations)
-    return self.decoder(f)
+    l1_norm = torch.linalg.norm(f, ord=1, dim=1)
+    if with_activations:
+        return self.decoder(f), l1_norm, f
+    else:
+        return self.decoder(f), l1_norm
