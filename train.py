@@ -5,6 +5,9 @@ import torch
 import tqdm
 
 
+"""
+Toy model training code
+"""
 def make_loss_fn(importance_weights):
     def loss_fn(x, x_hat):
         errs = (x - x_hat)**2
@@ -95,3 +98,54 @@ def train(config, progressbar=False):
     }
     
     return train_outputs
+
+
+"""
+SAE training code
+"""
+def sae_loss(x, x_hat, f_norm, l1_weight):
+    # Reconstruction loss
+    errs = (x - x_hat)**2
+    per_sample_errs = torch.sum(errs, dim=1)
+
+    # L1 norm
+    losses = per_sample_errs + l1_weight * f_norm
+    return torch.mean(losses)
+
+
+def train_sae(config, model, dataset, progressbar=True):
+    # Unpack configs
+    _ = config['data_config']
+    model_cfg = config['model_config']
+    train_cfg = config['training_config']
+    sae_cfg = config['sae_config']
+    device = config['train_device']
+
+    # Hyperparams
+    n_steps = train_cfg['n_steps_sae']
+    lr = train_cfg['lr_sae']
+    sae_dim = sae_cfg['sae_dim']
+    l1_weight = sae_cfg['l1_weight']
+
+    # Setup SAE
+    sae = models.SparseAutoEncoder(model_cfg["hidden_dim"], sae_dim).to(device['train_device'])
+    optimizer=torch.optim.AdamW(sae.parameters(), lr=lr)
+
+    # Training loop
+    losses = []
+    for _ in tqdm.tqdm(range(n_steps)):
+        x = dataset.sample(train_cfg['batch_size_sae'])  # sample from dataset
+        x_hat, activations = model(x, with_activations=True)  # put into superpos
+        x_recon, l1_norm, f = sae(activations['h'], with_activations=True)  # SAE
+        loss = sae_loss(activations['h'], x_recon, l1_norm, l1_weight)
+
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        losses.append(loss.item())
+
+    train_outs = {
+       'sae': sae,
+       'losses': losses,
+    }

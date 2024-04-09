@@ -14,6 +14,14 @@ train_cfg = {
     "n_steps": int(1e4),
     "batch_size": 8192,
     "resample": True,
+    "n_steps_sae": int(1e4),
+    "lr_sae": 1e-4,
+    "batch_size_sae": 8192,
+}
+
+sae_cfg = {
+    "sae_dim": 20,
+    "l1_weight": 1e-3
 }
 
 cfg = {
