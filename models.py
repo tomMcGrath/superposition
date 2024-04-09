@@ -44,7 +44,7 @@ class ReluOut(torch.nn.Module):
 
 class SparseAutoEncoder(torch.nn.Module):
 
-  def __init__(self, input_dim, hidden_dim):
+  def __init__(self, input_dim, hidden_dim, norm_p=1.):
     super().__init__()
     self.encoder = torch.nn.Linear(
       input_dim, hidden_dim
@@ -52,12 +52,13 @@ class SparseAutoEncoder(torch.nn.Module):
     self.decoder = torch.nn.Linear(
       hidden_dim, input_dim
     )
+    self.norm_p = norm_p
 
   def forward(self, x, with_activations=False):
     f_preactivations = self.encoder(x)
     f = torch.nn.functional.relu(f_preactivations)
-    l1_norm = torch.linalg.norm(f, ord=1, dim=1)
+    lp_norm = torch.linalg.norm(f, ord=self.norm_p, dim=1)
     if with_activations:
-        return self.decoder(f), l1_norm, f
+        return self.decoder(f), lp_norm, f
     else:
-        return self.decoder(f), l1_norm
+        return self.decoder(f), lp_norm
