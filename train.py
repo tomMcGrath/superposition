@@ -123,13 +123,18 @@ def train_sae(config, model, dataset, progressbar=True):
 
     # Hyperparams
     n_steps = train_cfg['n_steps_sae']
-    lr = train_cfg['lr_sae']
     sae_dim = sae_cfg['sae_dim']
     l1_weight = sae_cfg['l1_weight']
 
     # Setup SAE
     sae = models.SparseAutoEncoder(model_cfg["hidden_dim"], sae_dim).to(device['train_device'])
-    optimizer=torch.optim.AdamW(sae.parameters(), lr=lr)
+    optimizer=torch.optim.AdamW(sae.parameters(), lr=1.)
+    lr_fn = build_scheduler(
+       train_cfg['warmup_steps_sae'],
+       train_cfg['lr_sae'],
+       train_cfg['n_steps_sae']
+       )
+    scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lr_fn)
 
     # Training loop
     losses = []
@@ -142,6 +147,7 @@ def train_sae(config, model, dataset, progressbar=True):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        scheduler.step()
 
         losses.append(loss.item())
 

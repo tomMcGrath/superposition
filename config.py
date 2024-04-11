@@ -15,6 +15,7 @@ train_cfg = {
     "batch_size": 8192,
     "resample": True,
     "n_steps_sae": int(1e4),
+    "warmup_steps_sae": int(1e3),
     "lr_sae": 1e-4,
     "batch_size_sae": 8192,
 }
