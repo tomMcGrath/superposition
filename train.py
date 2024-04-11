@@ -155,3 +155,5 @@ def train_sae(config, model, dataset, progressbar=True):
        'sae': sae,
        'losses': losses,
     }
+
+    return train_outs
