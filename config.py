@@ -29,5 +29,6 @@ cfg = {
     "data_config": data_cfg,
     "model_config": model_cfg,
     "training_config": train_cfg,
+    "sae_config": sae_cfg,
     "train_device": "cuda:0",
 }
