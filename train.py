@@ -168,7 +168,7 @@ def train_sae(config, model, dataset, progressbar=True):
            'sae_loss': loss.item(),
            'recon_loss': recon_loss.item(),
            'l1_norm': l1_norm.item(),
-           'dead_neurons': metrics.dead_neurons(f).item(),
+           'live_neurons': metrics.live_neurons(f).item(),
            'l0': metrics.mean_l0(f).item(),
         })
 
