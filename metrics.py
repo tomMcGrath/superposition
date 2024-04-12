@@ -22,7 +22,6 @@ def mean_l0(x):
     return torch.mean(per_sample_norms)
 
 
-def dead_neurons(f):
-    """Returns the number of dimensions of f that are always zero."""
-    num_live_neurons = torch.count_nonzero(torch.sum(f, dim=0))
-    return f.shape[0] - num_live_neurons
+def live_neurons(f):
+    """Returns the number of neurons that ever fire on a batch."""
+    return torch.count_nonzero(torch.sum(f, dim=0))
