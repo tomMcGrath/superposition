@@ -1,5 +1,6 @@
 import datasets
 import models
+import metrics
 import numpy as np
 import torch
 import tqdm
@@ -43,7 +44,7 @@ def train(config, progressbar=False):
 
     # W&B setup
     run = wandb.init(
-       project="toy-saes",
+       project="toy-saes-base",
        config=config,
     )
     
@@ -130,6 +131,12 @@ def train_sae(config, model, dataset, progressbar=True):
     sae_cfg = config['sae_config']
     device = config['train_device']
 
+    # Setup W&B
+    run = wandb.init(
+       project="toy-saes-sae",
+       config=config,
+    )
+
     # Hyperparams
     n_steps = train_cfg['n_steps_sae']
     sae_dim = sae_cfg['sae_dim']
@@ -158,7 +165,12 @@ def train_sae(config, model, dataset, progressbar=True):
         optimizer.step()
         scheduler.step()
 
+        # Logging
         losses.append(loss.item())
+        wandb.log({
+           'sae_loss': loss.item(),
+           'dead_neurons': metrics.dead_neurons(f).item(),
+        })
 
     train_outs = {
        'sae': sae,
