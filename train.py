@@ -3,6 +3,7 @@ import models
 import numpy as np
 import torch
 import tqdm
+import wandb
 
 
 """
@@ -39,6 +40,12 @@ def train(config, progressbar=False):
     model_cfg = config['model_config']
     train_cfg = config['training_config']
     device = config['train_device']
+
+    # W&B setup
+    run = wandb.init(
+       project="toy-saes",
+       config=config,
+    )
     
     # Dataset setup
     n = data_cfg['data_dim']
@@ -87,8 +94,10 @@ def train(config, progressbar=False):
         loss.backward()
         optimizer.step()
         scheduler.step()
-
         losses.append(loss.item())
+
+        # Logging
+        wandb.log({'loss': loss.item()})
         
     # Prepare return values
     train_outputs = {
