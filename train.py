@@ -113,14 +113,9 @@ def train(config, progressbar=False):
 """
 SAE training code
 """
-def sae_loss(x, x_hat, f_norm, l1_weight):
-    # Reconstruction loss
+def mse(x, x_hat):
     errs = (x - x_hat)**2
-    per_sample_errs = torch.sum(errs, dim=1)
-
-    # L1 norm
-    losses = per_sample_errs + l1_weight * f_norm
-    return torch.mean(losses)
+    return torch.sum(errs, dim=1)
 
 
 def train_sae(config, model, dataset, progressbar=True):
@@ -158,7 +153,8 @@ def train_sae(config, model, dataset, progressbar=True):
         x = dataset.sample(train_cfg['batch_size_sae'])  # sample from dataset
         x_hat, activations = model(x, with_activations=True)  # put into superpos
         x_recon, l1_norm, f = sae(activations['h'], with_activations=True)  # SAE
-        loss = sae_loss(activations['h'], x_recon, l1_norm, l1_weight)
+        recon_loss = mse(activations['h'], x_recon)
+        loss = recon_loss + l1_norm * l1_weight
 
         optimizer.zero_grad()
         loss.backward()
@@ -169,7 +165,10 @@ def train_sae(config, model, dataset, progressbar=True):
         losses.append(loss.item())
         wandb.log({
            'sae_loss': loss.item(),
+           'recon_loss': recon_loss.item(),
+           'l1_norm': l1_norm.item(),
            'dead_neurons': metrics.dead_neurons(f).item(),
+           'l0': metrics.mean_l0(f).item(),
         })
 
     train_outs = {
