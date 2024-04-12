@@ -22,7 +22,8 @@ train_cfg = {
 
 sae_cfg = {
     "sae_dim": 20,
-    "l1_weight": 1e-3
+    "l1_weight": 1e-3,
+    "norm_p": 0.6,
 }
 
 cfg = {

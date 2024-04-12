@@ -138,7 +138,11 @@ def train_sae(config, model, dataset, progressbar=True):
     l1_weight = sae_cfg['l1_weight']
 
     # Setup SAE
-    sae = models.SparseAutoEncoder(model_cfg["hidden_dim"], sae_dim).to(device)
+    sae = models.SparseAutoEncoder(
+       model_cfg["hidden_dim"], 
+       sae_dim,
+       norm_p=sae_cfg['norm_p']
+       ).to(device)
     optimizer=torch.optim.AdamW(sae.parameters(), lr=1.)
     lr_fn = build_scheduler(
        train_cfg['warmup_steps_sae'],
