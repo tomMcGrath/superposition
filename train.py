@@ -115,7 +115,7 @@ SAE training code
 """
 def mse(x, x_hat):
     errs = (x - x_hat)**2
-    return torch.sum(errs, dim=1)
+    return torch.mean(torch.sum(errs, dim=1))
 
 
 def train_sae(config, model, dataset, progressbar=True):
@@ -151,10 +151,10 @@ def train_sae(config, model, dataset, progressbar=True):
     losses = []
     for _ in tqdm.tqdm(range(n_steps)):
         x = dataset.sample(train_cfg['batch_size_sae'])  # sample from dataset
-        x_hat, activations = model(x, with_activations=True)  # put into superpos
+        _, activations = model(x, with_activations=True)  # put into superpos
         x_recon, l1_norm, f = sae(activations['h'], with_activations=True)  # SAE
         recon_loss = mse(activations['h'], x_recon)
-        loss = recon_loss + l1_norm * l1_weight
+        loss = recon_loss + torch.mean(l1_norm) * l1_weight
 
         optimizer.zero_grad()
         loss.backward()
