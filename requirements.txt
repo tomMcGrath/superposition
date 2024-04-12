@@ -22,3 +22,4 @@ torchvision==0.17.2
 tqdm==4.66.2
 triton==2.2.0
 typing_extensions==4.8.0
+wandb==0.16.6
