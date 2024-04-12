@@ -159,7 +159,7 @@ def train_sae(config, model, dataset, progressbar=True):
         x_recon, l1_norm, f = sae(activations['h'], with_activations=True)  # SAE
         recon_loss = mse(activations['h'], x_recon)
         l1_norm = torch.mean(l1_norm)
-        loss = recon_loss + t * l1_norm * l1_weight
+        loss = recon_loss + (1. * t / n_steps) * l1_norm * l1_weight
 
         optimizer.zero_grad()
         loss.backward()
