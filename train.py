@@ -154,7 +154,8 @@ def train_sae(config, model, dataset, progressbar=True):
         _, activations = model(x, with_activations=True)  # put into superpos
         x_recon, l1_norm, f = sae(activations['h'], with_activations=True)  # SAE
         recon_loss = mse(activations['h'], x_recon)
-        loss = recon_loss + torch.mean(l1_norm) * l1_weight
+        l1_norm = torch.mean(l1_norm)
+        loss = recon_loss + l1_norm * l1_weight
 
         optimizer.zero_grad()
         loss.backward()
