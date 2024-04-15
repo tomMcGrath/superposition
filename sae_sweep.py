@@ -14,17 +14,18 @@ if __name__ == '__main__':
     # Get config
     cfg = config.cfg
     device = cfg['train_device']
-    sweep_cfg = utils.convert_or_recurse(
+    sweep_cfg_params = utils.convert_or_recurse(
         copy.deepcopy(cfg),
         utils.convert_to_sweep_format
         )
 
     # Initialise sweep
-    sweep_cfg['method'] = 'grid'
-    sweep_cfg['sae_config'].update({
+    sweep_cfg = {'method': 'grid'}
+    sweep_cfg_params['sae_config'].update({
         'l1_weight': {'values': [1e-3, 1e-2, 1e-1, 1e0]},
         'norm_p': {'values': [0.2, 0.5, 0.7, 1.]},
         })
+    sweep_cfg['parameters'] = sweep_cfg_params
 
     # Load model
     model_path = 'models/test.pt'
