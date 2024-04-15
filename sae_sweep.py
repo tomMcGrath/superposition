@@ -25,7 +25,10 @@ if __name__ == '__main__':
         'l1_weight': {'values': [1e-3, 1e-2, 1e-1, 1e0]},
         'norm_p': {'values': [0.2, 0.5, 0.7, 1.]},
         })
-    sweep_cfg['parameters'] = sweep_cfg_params
+    new_sweep_cfg_params = {}
+    for k in sweep_cfg_params.keys():
+        new_sweep_cfg_params[k] = {'parameters': sweep_cfg_params[k]}
+    sweep_cfg['parameters'] = new_sweep_cfg_params
 
     # Load model
     model_path = 'models/test.pt'
